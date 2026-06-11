@@ -1,718 +1,223 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Gabinete Digital — Gestão de Mandato</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gabinete Digital</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --ink:#0E1726;--panel:#152034;--panel-2:#1B2942;--panel-3:#22304C;
-    --line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.14);
-    --txt:#EAF0FA;--muted:#8FA0BE;--muted-2:#62739A;
-    --gold:#E6B04A;--gold-soft:rgba(230,176,74,.13);--gold-line:rgba(230,176,74,.45);
-    --green:#3FB984;--green-soft:rgba(63,185,132,.14);
-    --red:#E5573F;--red-soft:rgba(229,87,63,.14);
-    --amber:#E8A33D;--amber-soft:rgba(232,163,61,.14);
-    --blue:#5B8DEF;--blue-soft:rgba(91,141,239,.14);
-    --wa:#25D366;--wa-soft:rgba(37,211,102,.14);
-    --display:'Sora',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
-    --r:14px;--r-sm:10px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{font-family:var(--body);background:var(--ink);color:var(--txt);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
-  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 600px at 82% -8%,rgba(230,176,74,.07),transparent 60%),radial-gradient(700px 500px at -5% 100%,rgba(91,141,239,.06),transparent 55%)}
-  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;transition:.16s}
-  input,select,textarea{font-family:inherit;font-size:14px}
-  ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:var(--panel-3);border-radius:8px}
-
-  /* Auth Screen */
-  .auth-screen{position:fixed;inset:0;background:var(--ink);z-index:100;display:grid;place-items:center;padding:20px}
-  .auth-screen.hidden{display:none}
-  .auth-box{background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;width:100%;max-width:420px;padding:40px;box-shadow:0 25px 50px rgba(0,0,0,.3)}
-  .auth-box .seal{width:48px;height:48px;border-radius:11px;background:linear-gradient(145deg,var(--gold),#b8842b);display:grid;place-items:center;margin:0 auto 24px;box-shadow:0 4px 16px rgba(230,176,74,.28)}
-  .auth-box .seal svg{width:28px;height:28px;stroke:#1a1206;stroke-width:1.8}
-  .auth-box h1{font-family:var(--display);font-size:28px;font-weight:800;margin-bottom:8px}
-  .auth-box p{color:var(--muted);margin-bottom:28px}
-  .auth-form .field{margin-bottom:18px}
-  .auth-form label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600}
-  .auth-form input{width:100%;padding:11px 14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
-  .auth-form input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
-  .btn-auth{width:100%;padding:12px;margin-bottom:10px;font-size:14px;font-weight:600;border-radius:10px}
-  .btn-auth.gold{background:var(--gold);color:#1a1206}
-  .btn-auth.ghost{background:var(--panel-2);color:var(--txt);border:1px solid var(--line)}
-  .auth-error{background:var(--red-soft);border:1px solid var(--red);color:var(--red);padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:16px;display:none}
-
-  /* Shell */
-  .app{position:relative;z-index:1;display:grid;grid-template-columns:262px 1fr;min-height:100vh;transition:.25s}
-  .app.hidden{display:none}
-  .sidebar{background:linear-gradient(180deg,#101a2c,#0C1422);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto}
-  .brand{display:flex;align-items:center;gap:11px;padding:4px 8px 18px}
-  .seal{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,var(--gold),#b8842b);display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 16px rgba(230,176,74,.28)}
-  .seal svg{width:22px;height:22px}
-  .brand b{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:-.01em;display:block;line-height:1.1}
-  .brand span{font-size:10.5px;color:var(--muted-2);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
-  .nav-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);font-weight:700;padding:14px 10px 6px}
-  .nav-btn{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:var(--r-sm);color:var(--muted);font-weight:500;font-size:13.5px;text-align:left;transition:.16s;position:relative;white-space:nowrap}
-  .nav-btn svg{width:18px;height:18px;flex-shrink:0;stroke-width:1.8}
-  .nav-btn:hover{background:var(--panel);color:var(--txt)}
-  .nav-btn.active{background:var(--gold-soft);color:var(--gold);font-weight:600}
-  .nav-btn.active::before{content:"";position:absolute;left:-16px;top:9px;bottom:9px;width:3px;background:var(--gold);border-radius:0 3px 3px 0}
-  .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:grid;place-items:center;padding:0 5px;font-family:var(--mono)}
-  .side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}
-  .logout-btn{width:100%;padding:10px 12px;border-radius:var(--r-sm);background:var(--red-soft);color:var(--red);font-weight:600;font-size:13px;border:1px solid transparent}
-  .logout-btn:hover{background:var(--red);color:#fff}
-
-  /* Main */
-  .main{padding:0;min-width:0;display:flex;flex-direction:column}
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 30px;border-bottom:1px solid var(--line);background:rgba(14,23,38,.7);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
-  .topbar-left h1{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em}
-  .topbar-left .date{color:var(--muted);font-size:12.5px;margin-top:1px;text-transform:capitalize}
-  .topbar-right{display:flex;gap:12px}
-  .content{padding:26px 30px 60px;overflow-x:hidden}
-  .view{display:none;animation:fade .3s ease}
-  .view.show{display:block}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border-radius:var(--r-sm);font-weight:600;font-size:13px;white-space:nowrap}
-  .btn svg{width:16px;height:16px;stroke-width:2}
-  .btn-gold{background:var(--gold);color:#1a1206;box-shadow:0 4px 14px rgba(230,176,74,.25)}
-  .btn-gold:hover{filter:brightness(1.07);transform:translateY(-1px)}
-  .btn-ghost{background:var(--panel);border:1px solid var(--line);color:var(--txt)}
-  .btn-ghost:hover{border-color:var(--line-strong);background:var(--panel-2)}
-  .btn-sm{padding:7px 11px;font-size:12px;border-radius:8px}
-
-  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden}
-  .stat .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:12px}
-  .stat .ico svg{width:18px;height:18px;stroke-width:2}
-  .stat .num{font-family:var(--display);font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1}
-  .stat .lbl{font-size:12px;color:var(--muted);margin-top:5px}
-  .i-gold{background:var(--gold-soft);color:var(--gold)}
-  .i-green{background:var(--green-soft);color:var(--green)}
-  .i-red{background:var(--red-soft);color:var(--red)}
-  .i-blue{background:var(--blue-soft);color:var(--blue)}
-  .i-wa{background:var(--wa-soft);color:var(--wa)}
-
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px}
-  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .panel-head h2{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:-.01em}
-  .empty{text-align:center;padding:46px 20px;color:var(--muted)}
-  .empty svg{width:42px;height:42px;color:var(--muted-2);stroke-width:1.5;margin-bottom:12px}
-  .empty b{display:block;font-family:var(--display);font-size:15px;color:var(--txt);margin-bottom:4px}
-
-  .toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:9px;align-items:center}
-  .toast{background:var(--panel-3);border:1px solid var(--line-strong);border-radius:11px;padding:12px 18px;font-weight:600;font-size:13px;box-shadow:0 12px 32px rgba(0,0,0,.4);display:flex;align-items:center;gap:9px;animation:slideup .3s ease}
-  .toast svg{width:17px;height:17px;color:var(--green)}
-  @keyframes slideup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-
-  /* Timeline */
-  .timeline{position:relative;padding:20px 0;padding-left:30px}
-  .timeline::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),transparent)}
-  .event{position:relative;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line)}
-  .event:last-child{border:none;margin-bottom:0;padding-bottom:0}
-  .event::before{content:"";position:absolute;left:-27px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--gold);border:3px solid var(--ink);box-shadow:0 0 0 4px rgba(230,176,74,.2)}
-  .event-time{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px}
-  .event-title{font-weight:600;margin-bottom:4px}
-  .event-desc{font-size:12px;color:var(--muted)}
-
-  /* Demandas Pipeline */
-  .pipeline{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .pipeline-col h3{font-family:var(--display);font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
-  .card{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;cursor:grab}
-  .card:hover{border-color:var(--gold)}
-  .card-title{font-weight:600;font-size:13px;margin-bottom:6px}
-  .card-info{font-size:11px;color:var(--muted);margin-bottom:8px}
-  .card-acts{display:flex;gap:4px}
-  .ico-btn{width:28px;height:28px;border-radius:6px;background:var(--panel-3);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);cursor:pointer}
-  .ico-btn:hover{color:var(--gold);border-color:var(--gold)}
-  .ico-btn svg{width:13px;height:13px;stroke-width:2}
-
-  .chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--line)}
-  .c-nova{background:var(--blue-soft);color:var(--blue);border-color:transparent}
-  .c-andamento{background:var(--amber-soft);color:var(--amber);border-color:transparent}
-  .c-resolvida{background:var(--green-soft);color:var(--green);border-color:transparent}
-  .c-urgente{background:var(--red-soft);color:var(--red);border-color:transparent}
-  .c-alta{background:var(--amber-soft);color:var(--amber);border-color:transparent}
-  .c-normal{background:var(--blue-soft);color:var(--blue);border-color:transparent}
-  .c-baixa{background:var(--green-soft);color:var(--green);border-color:transparent}
-
-  /* Modal */
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:50;backdrop-filter:blur(4px);padding:20px;display:none}
-  .modal-overlay.show{display:grid}
-  .modal{background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;width:100%;max-width:500px;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,.4)}
-  .modal h2{font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:20px}
-  .form-group{margin-bottom:16px}
-  .form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-  .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:13px}
-  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
-  .modal-actions{display:flex;gap:10px;margin-top:24px}
-  .modal-actions button{flex:1;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer}
-  .btn-save{background:var(--gold);color:#1a1206}
-  .btn-cancel{background:var(--panel-2);border:1px solid var(--line);color:var(--txt)}
-
-  /* Responsive */
-  @media(max-width:1200px){
-    .stat-row{grid-template-columns:repeat(2,1fr)}
-    .pipeline{grid-template-columns:1fr}
-  }
-  @media(max-width:768px){
-    .app{grid-template-columns:1fr}
-    .sidebar{position:fixed;left:-262px;width:262px;height:100vh;z-index:80;transition:.25s}
-    .sidebar.open{left:0}
-    .content{padding:20px 16px 60px}
-    .topbar{padding:14px 16px}
-    .stat-row{grid-template-columns:1fr}
-  }
+:root{--ink:#0E1726;--panel:#152034;--panel-2:#1B2942;--panel-3:#22304C;--line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.14);--txt:#EAF0FA;--muted:#8FA0BE;--muted-2:#62739A;--gold:#E6B04A;--gold-soft:rgba(230,176,74,.13);--green:#3FB984;--green-soft:rgba(63,185,132,.14);--red:#E5573F;--red-soft:rgba(229,87,63,.14);--amber:#E8A33D;--amber-soft:rgba(232,163,61,.14);--blue:#5B8DEF;--blue-soft:rgba(91,141,239,.14);--wa:#25D366;--wa-soft:rgba(37,211,102,.14);--display:'Sora',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--r:14px;--r-sm:10px;}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:var(--body);background:var(--ink);color:var(--txt);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(900px 600px at 82% -8%,rgba(230,176,74,.07),transparent 60%),radial-gradient(700px 500px at -5% 100%,rgba(91,141,239,.06),transparent 55%)}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;transition:.16s}input,select,textarea{font-family:inherit;font-size:14px}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:var(--panel-3);border-radius:8px}
+.auth-screen{position:fixed;inset:0;background:var(--ink);z-index:100;display:grid;place-items:center;padding:20px}
+.auth-screen.hidden{display:none}
+.auth-box{background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;width:100%;max-width:420px;padding:40px;box-shadow:0 25px 50px rgba(0,0,0,.3)}
+.auth-box .seal{width:48px;height:48px;border-radius:11px;background:linear-gradient(145deg,var(--gold),#b8842b);display:grid;place-items:center;margin:0 auto 24px;box-shadow:0 4px 16px rgba(230,176,74,.28)}
+.auth-box .seal svg{width:28px;height:28px;stroke:#1a1206;stroke-width:1.8}
+.auth-box h1{font-family:var(--display);font-size:28px;font-weight:800;margin-bottom:8px}
+.auth-box p{color:var(--muted);margin-bottom:28px}
+.auth-form .field{margin-bottom:18px}
+.auth-form label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.auth-form input{width:100%;padding:11px 14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:14px}
+.auth-form input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.btn-auth{width:100%;padding:12px;margin-bottom:10px;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer}
+.btn-auth.gold{background:var(--gold);color:#1a1206}.btn-auth.ghost{background:var(--panel-2);color:var(--txt);border:1px solid var(--line)}
+.auth-error{background:var(--red-soft);border:1px solid var(--red);color:var(--red);padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:16px;display:none}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:262px 1fr;min-height:100vh}
+.app.hidden{display:none}
+.sidebar{background:linear-gradient(180deg,#101a2c,#0C1422);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 18px}
+.seal{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,var(--gold),#b8842b);display:grid;place-items:center;flex-shrink:0;box-shadow:0 4px 16px rgba(230,176,74,.28)}
+.seal svg{width:22px;height:22px}
+.brand b{font-family:var(--display);font-weight:800;font-size:16px;letter-spacing:-.01em;display:block;line-height:1.1}
+.brand span{font-size:10.5px;color:var(--muted-2);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.nav-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);font-weight:700;padding:14px 10px 6px}
+.nav-btn{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:var(--r-sm);color:var(--muted);font-weight:500;font-size:13.5px;text-align:left;transition:.16s;position:relative;white-space:nowrap}
+.nav-btn svg{width:18px;height:18px;flex-shrink:0;stroke-width:1.8}
+.nav-btn:hover{background:var(--panel);color:var(--txt)}
+.nav-btn.active{background:var(--gold-soft);color:var(--gold);font-weight:600}
+.nav-btn.active::before{content:"";position:absolute;left:-16px;top:9px;bottom:9px;width:3px;background:var(--gold);border-radius:0 3px 3px 0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;min-width:19px;height:19px;border-radius:10px;display:grid;place-items:center;padding:0 5px;font-family:var(--mono)}
+.side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:14px}
+.logout-btn{width:100%;padding:10px 12px;border-radius:var(--r-sm);background:var(--red-soft);color:var(--red);font-weight:600;font-size:13px}
+.logout-btn:hover{background:var(--red);color:#fff}
+.main{padding:0;min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 30px;border-bottom:1px solid var(--line);background:rgba(14,23,38,.7);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+.topbar h1{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.topbar .date{color:var(--muted);font-size:12.5px;margin-top:1px;text-transform:capitalize}
+.content{padding:26px 30px 60px;overflow-x:hidden}
+.view{display:none;animation:fade .3s ease}
+.view.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border-radius:var(--r-sm);font-weight:600;font-size:13px;white-space:nowrap}
+.btn svg{width:16px;height:16px;stroke-width:2}
+.btn-gold{background:var(--gold);color:#1a1206;box-shadow:0 4px 14px rgba(230,176,74,.25)}
+.btn-gold:hover{filter:brightness(1.07)}
+.btn-ghost{background:var(--panel);border:1px solid var(--line);color:var(--txt)}
+.btn-ghost:hover{border-color:var(--line-strong);background:var(--panel-2)}
+.btn-sm{padding:7px 11px;font-size:12px;border-radius:8px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.stat .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:12px}
+.stat .ico svg{width:18px;height:18px;stroke-width:2}
+.stat .num{font-family:var(--display);font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat .lbl{font-size:12px;color:var(--muted);margin-top:5px}
+.i-gold{background:var(--gold-soft);color:var(--gold)}.i-green{background:var(--green-soft);color:var(--green)}.i-red{background:var(--red-soft);color:var(--red)}.i-blue{background:var(--blue-soft);color:var(--blue)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.panel-head h2{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:-.01em}
+.empty{text-align:center;padding:46px 20px;color:var(--muted)}
+.toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:9px}
+.toast{background:var(--panel-3);border:1px solid var(--line-strong);border-radius:11px;padding:12px 18px;font-weight:600;font-size:13px;box-shadow:0 12px 32px rgba(0,0,0,.4);animation:slideup .3s ease}
+@keyframes slideup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.timeline{position:relative;padding:20px 0 20px 30px}
+.timeline::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),transparent)}
+.event{position:relative;margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.event::before{content:"";position:absolute;left:-27px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--gold);border:3px solid var(--ink);box-shadow:0 0 0 4px rgba(230,176,74,.2)}
+.event-time{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px}
+.event-title{font-weight:600;margin-bottom:4px}
+.event-desc{font-size:12px;color:var(--muted)}
+.pipeline{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pipeline-col h3{font-family:var(--display);font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.card{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;margin-bottom:10px;cursor:grab}
+.card:hover{border-color:var(--gold)}
+.card-title{font-weight:600;font-size:13px;margin-bottom:6px}
+.card-info{font-size:11px;color:var(--muted);margin-bottom:8px}
+.ico-btn{width:28px;height:28px;border-radius:6px;background:var(--panel-3);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.ico-btn:hover{color:var(--gold);border-color:var(--gold)}
+.ico-btn svg{width:13px;height:13px;stroke-width:2}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--line)}
+.c-nova{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.c-andamento{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.c-resolvida{background:var(--green-soft);color:var(--green);border-color:transparent}
+.c-urgente{background:var(--red-soft);color:var(--red);border-color:transparent}
+.c-alta{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.c-normal{background:var(--blue-soft);color:var(--blue);border-color:transparent}
+.c-baixa{background:var(--green-soft);color:var(--green);border-color:transparent}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(4px);padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;width:100%;max-width:500px;padding:28px;box-shadow:0 25px 60px rgba(0,0,0,.4)}
+.modal h2{font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--txt);font-size:13px}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.modal-actions{display:flex;gap:10px;margin-top:24px}
+.modal-actions button{flex:1;padding:11px;border-radius:8px;font-weight:600;font-size:13px;cursor:pointer}
+.btn-save{background:var(--gold);color:#1a1206;border:none}
+.btn-cancel{background:var(--panel-2);border:1px solid var(--line);color:var(--txt)}
+.row{padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.row strong{display:block;margin-bottom:4px}
+.row-sub{font-size:12px;color:var(--muted)}
+@media(max-width:1200px){.stat-row{grid-template-columns:repeat(2,1fr)}.pipeline{grid-template-columns:1fr}}
+@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{position:fixed;left:-262px;width:262px;height:100vh;z-index:80}.content{padding:20px 16px 60px}.topbar{padding:14px 16px}.stat-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
 <div class="auth-screen" id="authScreen">
-  <div class="auth-box">
-    <div class="seal">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
-    </div>
-    <h1 id="authTitle">Entrar</h1>
-    <p id="authSubtitle">Gabinete Digital — Gestão de mandato</p>
-    <div class="auth-error" id="authError"></div>
-    <form class="auth-form" id="authForm" onsubmit="handleAuthSubmit(event)">
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="authEmail" placeholder="seu@email.com" required>
-      </div>
-      <div class="field">
-        <label>Senha</label>
-        <input type="password" id="authPassword" placeholder="••••••••" required>
-      </div>
-      <button type="submit" class="btn-auth gold" id="authBtn">Entrar</button>
-      <button type="button" class="btn-auth ghost" id="authToggle">Criar nova conta</button>
-    </form>
-  </div>
+<div class="auth-box">
+<div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></div>
+<h1 id="authTitle">Entrar</h1>
+<p id="authSubtitle">Gabinete Digital — Gestão de mandato</p>
+<div class="auth-error" id="authError"></div>
+<form class="auth-form" id="authForm" onsubmit="handleAuthSubmit(event)">
+<div class="field"><label>Email</label><input type="email" id="authEmail" placeholder="seu@email.com" required></div>
+<div class="field"><label>Senha</label><input type="password" id="authPassword" placeholder="••••••••" required></div>
+<button type="submit" class="btn-auth gold" id="authBtn">Entrar</button>
+<button type="button" class="btn-auth ghost" id="authToggle">Criar nova conta</button>
+</form>
+</div>
 </div>
 
-<!-- APP -->
 <div class="app" id="appContainer">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="seal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
-      </div>
-      <div><b>Gabinete</b><span>Digital</span></div>
-    </div>
+<aside class="sidebar" id="sidebar">
+<div class="brand"><div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg></div><div><b>Gabinete</b><span>Digital</span></div></div>
+<div class="nav-label">Gestão</div>
+<button class="nav-btn active" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Painel</button>
+<button class="nav-btn" data-nav="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</button>
+<button class="nav-btn" data-nav="demandas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Demandas</button>
+<button class="nav-btn" data-nav="contatos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contatos</button>
+<button class="nav-btn" data-nav="equipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipe</button>
+<button class="nav-btn" data-nav="metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Metas</button>
+<button class="nav-btn" data-nav="whatsapp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>WhatsApp</button>
+<button class="nav-btn" data-nav="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</button>
+<div class="side-foot"><button class="logout-btn" id="logoutBtn">🚪 Sair</button></div>
+</aside>
 
-    <div class="nav-label">Gestão</div>
-    <button class="nav-btn active" data-nav="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Painel</button>
-    <button class="nav-btn" data-nav="agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</button>
-    <button class="nav-btn" data-nav="demandas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Demandas</button>
-    <button class="nav-btn" data-nav="contatos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Contatos</button>
-    <button class="nav-btn" data-nav="equipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Equipe</button>
-    <button class="nav-btn" data-nav="metas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Metas</button>
-    <button class="nav-btn" data-nav="whatsapp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>WhatsApp</button>
-    <button class="nav-btn" data-nav="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Relatórios</button>
-
-    <div class="side-foot">
-      <button class="logout-btn" id="logoutBtn">🚪 Sair</button>
-    </div>
-  </aside>
-
-  <main class="main">
-    <div class="topbar">
-      <div class="topbar-left">
-        <h1 id="pageTitle">Painel</h1>
-        <div class="date" id="topDate"></div>
-      </div>
-      <div class="topbar-right">
-        <button class="btn btn-gold" id="btnAdd" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button>
-      </div>
-    </div>
-
-    <div class="content">
-      <!-- Dashboard -->
-      <section class="view show" id="v-dashboard">
-        <div class="stat-row" id="statRow"></div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
-          <div class="panel">
-            <div class="panel-head"><h2>Agenda de hoje</h2></div>
-            <div id="agendaTimeline"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><h2>Demandas urgentes</h2></div>
-            <div id="urgentList"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Agenda -->
-      <section class="view" id="v-agenda">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Agenda</h2>
-            <button class="btn btn-gold btn-sm" id="btnAddAgenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button>
-          </div>
-          <div id="agendaList"></div>
-        </div>
-      </section>
-
-      <!-- Demandas -->
-      <section class="view" id="v-demandas">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Demandas</h2>
-            <button class="btn btn-gold btn-sm" id="btnAddDemanda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Nova</button>
-          </div>
-          <div class="pipeline" id="demandaPipeline"></div>
-        </div>
-      </section>
-
-      <!-- Contatos -->
-      <section class="view" id="v-contatos">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Contatos e Lideranças</h2>
-            <button class="btn btn-gold btn-sm" id="btnAddContato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button>
-          </div>
-          <div id="contatoList"></div>
-        </div>
-      </section>
-
-      <!-- Equipe -->
-      <section class="view" id="v-equipe">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Equipe do Gabinete</h2>
-            <button class="btn btn-gold btn-sm" id="btnAddEquipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button>
-          </div>
-          <div id="equipeList"></div>
-        </div>
-      </section>
-
-      <!-- Metas -->
-      <section class="view" id="v-metas">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Metas Semanais</h2>
-            <button class="btn btn-gold btn-sm" id="btnAddMeta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Nova</button>
-          </div>
-          <div id="metaList"></div>
-        </div>
-      </section>
-
-      <!-- WhatsApp -->
-      <section class="view" id="v-whatsapp">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Templates WhatsApp</h2>
-            <button class="btn btn-gold btn-sm" id="btnAddTemplate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button>
-          </div>
-          <div id="templateList"></div>
-        </div>
-      </section>
-
-      <!-- Relatórios -->
-      <section class="view" id="v-relatorios">
-        <div class="panel">
-          <div class="panel-head"><h2>Relatórios por Bairro</h2></div>
-          <svg id="chartBairro" style="width:100%;height:300px;margin-bottom:20px" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
-            <rect x="40" y="20" width="620" height="240" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
-          </svg>
-        </div>
-      </section>
-    </div>
-  </main>
+<main class="main">
+<div class="topbar">
+<div><h1 id="pageTitle">Painel</h1><div class="date" id="topDate"></div></div>
+<div><button class="btn btn-gold" id="btnAdd" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button></div>
+</div>
+<div class="content">
+<section class="view show" id="v-dashboard"><div class="stat-row" id="statRow"></div><div style="display:grid;grid-template-columns:2fr 1fr;gap:16px"><div class="panel"><div class="panel-head"><h2>Agenda de hoje</h2></div><div id="agendaTimeline"></div></div><div class="panel"><div class="panel-head"><h2>Demandas urgentes</h2></div><div id="urgentList"></div></div></div></section>
+<section class="view" id="v-agenda"><div class="panel"><div class="panel-head"><h2>Agenda</h2><button class="btn btn-gold btn-sm" id="btnAddAgenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button></div><div id="agendaList"></div></div></section>
+<section class="view" id="v-demandas"><div class="panel"><div class="panel-head"><h2>Demandas</h2><button class="btn btn-gold btn-sm" id="btnAddDemanda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Nova</button></div><div class="pipeline" id="demandaPipeline"></div></div></section>
+<section class="view" id="v-contatos"><div class="panel"><div class="panel-head"><h2>Contatos e Lideranças</h2><button class="btn btn-gold btn-sm" id="btnAddContato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button></div><div id="contatoList"></div></div></section>
+<section class="view" id="v-equipe"><div class="panel"><div class="panel-head"><h2>Equipe do Gabinete</h2><button class="btn btn-gold btn-sm" id="btnAddEquipe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button></div><div id="equipeList"></div></div></section>
+<section class="view" id="v-metas"><div class="panel"><div class="panel-head"><h2>Metas Semanais</h2><button class="btn btn-gold btn-sm" id="btnAddMeta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Nova</button></div><div id="metaList"></div></div></section>
+<section class="view" id="v-whatsapp"><div class="panel"><div class="panel-head"><h2>Templates WhatsApp</h2><button class="btn btn-gold btn-sm" id="btnAddTemplate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Novo</button></div><div id="templateList"></div></div></section>
+<section class="view" id="v-relatorios"><div class="panel"><div class="panel-head"><h2>Relatórios por Bairro</h2></div><svg id="chartBairro" style="width:100%;height:300px;margin-bottom:20px" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="20" width="620" height="240" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/></svg></div></section>
+</div>
+</main>
 </div>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="modalAgenda">
-  <div class="modal">
-    <h2>Novo Compromisso</h2>
-    <form onsubmit="saveAgenda(event)">
-      <div class="form-group">
-        <label>Título</label>
-        <input type="text" id="agendaTitle" required>
-      </div>
-      <div class="form-group">
-        <label>Data</label>
-        <input type="date" id="agendaData" required>
-      </div>
-      <div class="form-group">
-        <label>Hora</label>
-        <input type="time" id="agendaHora" required>
-      </div>
-      <div class="form-group">
-        <label>Local/Bairro</label>
-        <input type="text" id="agendaLocal" placeholder="Ex: Centro, Cohatrac">
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="agendaStatus"><option value="agendado">Agendado</option><option value="confirmado">Confirmado</option><option value="cancelado">Cancelado</option></select>
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="modal-actions button btn-save">Salvar</button>
-        <button type="button" class="modal-actions button btn-cancel" onclick="closeModal('modalAgenda')">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="modal-overlay" id="modalAgenda"><div class="modal"><h2>Novo Compromisso</h2><form onsubmit="saveAgenda(event)"><div class="form-group"><label>Título</label><input type="text" id="agendaTitle" required></div><div class="form-group"><label>Data</label><input type="date" id="agendaData" required></div><div class="form-group"><label>Hora</label><input type="time" id="agendaHora" required></div><div class="form-group"><label>Local/Bairro</label><input type="text" id="agendaLocal" placeholder="Ex: Centro, Cohatrac"></div><div class="form-group"><label>Status</label><select id="agendaStatus"><option value="agendado">Agendado</option><option value="confirmado">Confirmado</option><option value="cancelado">Cancelado</option></select></div><div class="modal-actions"><button type="submit" class="btn-save">Salvar</button><button type="button" class="btn-cancel" onclick="closeModal('modalAgenda')">Cancelar</button></div></form></div></div>
 
-<div class="modal-overlay" id="modalDemanda">
-  <div class="modal">
-    <h2>Nova Demanda</h2>
-    <form onsubmit="saveDemanda(event)">
-      <div class="form-group">
-        <label>Título</label>
-        <input type="text" id="demandaTitle" required>
-      </div>
-      <div class="form-group">
-        <label>Solicitante</label>
-        <input type="text" id="demandaSolicitante" required>
-      </div>
-      <div class="form-group">
-        <label>Bairro</label>
-        <input type="text" id="demandaBairro" required>
-      </div>
-      <div class="form-group">
-        <label>Prioridade</label>
-        <select id="demandaPrioridade"><option value="baixa">Baixa</option><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="demandaStatus"><option value="nova">Nova</option><option value="andamento">Em Andamento</option><option value="resolvida">Resolvida</option></select>
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="modal-actions button btn-save">Salvar</button>
-        <button type="button" class="modal-actions button btn-cancel" onclick="closeModal('modalDemanda')">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="modal-overlay" id="modalDemanda"><div class="modal"><h2>Nova Demanda</h2><form onsubmit="saveDemanda(event)"><div class="form-group"><label>Título</label><input type="text" id="demandaTitle" required></div><div class="form-group"><label>Solicitante</label><input type="text" id="demandaSolicitante" required></div><div class="form-group"><label>Bairro</label><input type="text" id="demandaBairro" required></div><div class="form-group"><label>Prioridade</label><select id="demandaPrioridade"><option value="baixa">Baixa</option><option value="normal">Normal</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select></div><div class="form-group"><label>Status</label><select id="demandaStatus"><option value="nova">Nova</option><option value="andamento">Em Andamento</option><option value="resolvida">Resolvida</option></select></div><div class="modal-actions"><button type="submit" class="btn-save">Salvar</button><button type="button" class="btn-cancel" onclick="closeModal('modalDemanda')">Cancelar</button></div></form></div></div>
 
-<div class="modal-overlay" id="modalContato">
-  <div class="modal">
-    <h2>Novo Contato</h2>
-    <form onsubmit="saveContato(event)">
-      <div class="form-group">
-        <label>Nome</label>
-        <input type="text" id="contatoNome" required>
-      </div>
-      <div class="form-group">
-        <label>Cargo/Função</label>
-        <input type="text" id="contatoCargo" placeholder="Ex: Presidente da Associação">
-      </div>
-      <div class="form-group">
-        <label>Telefone</label>
-        <input type="tel" id="contatoTel" placeholder="(98) 98765-4321">
-      </div>
-      <div class="form-group">
-        <label>Bairro</label>
-        <input type="text" id="contatoBairro" required>
-      </div>
-      <div class="form-group">
-        <label>Data de Aniversário (opcional)</label>
-        <input type="date" id="contatoAniversario">
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="modal-actions button btn-save">Salvar</button>
-        <button type="button" class="modal-actions button btn-cancel" onclick="closeModal('modalContato')">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="modal-overlay" id="modalContato"><div class="modal"><h2>Novo Contato</h2><form onsubmit="saveContato(event)"><div class="form-group"><label>Nome</label><input type="text" id="contatoNome" required></div><div class="form-group"><label>Cargo/Função</label><input type="text" id="contatoCargo" placeholder="Ex: Presidente da Associação"></div><div class="form-group"><label>Telefone</label><input type="tel" id="contatoTel" placeholder="(98) 98765-4321"></div><div class="form-group"><label>Bairro</label><input type="text" id="contatoBairro" required></div><div class="form-group"><label>Data de Aniversário</label><input type="date" id="contatoAniversario"></div><div class="modal-actions"><button type="submit" class="btn-save">Salvar</button><button type="button" class="btn-cancel" onclick="closeModal('modalContato')">Cancelar</button></div></form></div></div>
 
-<div class="modal-overlay" id="modalEquipe">
-  <div class="modal">
-    <h2>Membro da Equipe</h2>
-    <form onsubmit="saveEquipe(event)">
-      <div class="form-group">
-        <label>Nome</label>
-        <input type="text" id="equipNome" required>
-      </div>
-      <div class="form-group">
-        <label>Função</label>
-        <input type="text" id="equipFuncao" required>
-      </div>
-      <div class="form-group">
-        <label>Telefone</label>
-        <input type="tel" id="equipTel">
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="modal-actions button btn-save">Salvar</button>
-        <button type="button" class="modal-actions button btn-cancel" onclick="closeModal('modalEquipe')">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="modal-overlay" id="modalEquipe"><div class="modal"><h2>Membro da Equipe</h2><form onsubmit="saveEquipe(event)"><div class="form-group"><label>Nome</label><input type="text" id="equipNome" required></div><div class="form-group"><label>Função</label><input type="text" id="equipFuncao" required></div><div class="form-group"><label>Telefone</label><input type="tel" id="equipTel"></div><div class="modal-actions"><button type="submit" class="btn-save">Salvar</button><button type="button" class="btn-cancel" onclick="closeModal('modalEquipe')">Cancelar</button></div></form></div></div>
 
-<div class="modal-overlay" id="modalMeta">
-  <div class="modal">
-    <h2>Nova Meta</h2>
-    <form onsubmit="saveMeta(event)">
-      <div class="form-group">
-        <label>Descrição</label>
-        <input type="text" id="metaDesc" required>
-      </div>
-      <div class="form-group">
-        <label>Progresso (%)</label>
-        <input type="number" id="metaProgress" min="0" max="100" value="0">
-      </div>
-      <div class="form-group">
-        <label>Responsável</label>
-        <input type="text" id="metaResponsavel">
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="modal-actions button btn-save">Salvar</button>
-        <button type="button" class="modal-actions button btn-cancel" onclick="closeModal('modalMeta')">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="modal-overlay" id="modalMeta"><div class="modal"><h2>Nova Meta</h2><form onsubmit="saveMeta(event)"><div class="form-group"><label>Descrição</label><input type="text" id="metaDesc" required></div><div class="form-group"><label>Progresso (%)</label><input type="number" id="metaProgress" min="0" max="100" value="0"></div><div class="form-group"><label>Responsável</label><input type="text" id="metaResponsavel"></div><div class="modal-actions"><button type="submit" class="btn-save">Salvar</button><button type="button" class="btn-cancel" onclick="closeModal('modalMeta')">Cancelar</button></div></form></div></div>
 
-<div class="modal-overlay" id="modalTemplate">
-  <div class="modal">
-    <h2>Template WhatsApp</h2>
-    <form onsubmit="saveTemplate(event)">
-      <div class="form-group">
-        <label>Nome</label>
-        <input type="text" id="templateNome" required>
-      </div>
-      <div class="form-group">
-        <label>Mensagem</label>
-        <textarea id="templateMsg" rows="5" required style="resize:vertical"></textarea>
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="modal-actions button btn-save">Salvar</button>
-        <button type="button" class="modal-actions button btn-cancel" onclick="closeModal('modalTemplate')">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div class="modal-overlay" id="modalTemplate"><div class="modal"><h2>Template WhatsApp</h2><form onsubmit="saveTemplate(event)"><div class="form-group"><label>Nome</label><input type="text" id="templateNome" required></div><div class="form-group"><label>Mensagem</label><textarea id="templateMsg" rows="5" required></textarea></div><div class="modal-actions"><button type="submit" class="btn-save">Salvar</button><button type="button" class="btn-cancel" onclick="closeModal('modalTemplate')">Cancelar</button></div></form></div></div>
 
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
 <script>
 const firebaseConfig={apiKey:"AIzaSyATw1-WE89XYV3l2SBNoJJXmwkIYRB0c3U",authDomain:"gabinete-rodrigo-v2.firebaseapp.com",projectId:"gabinete-rodrigo-v2",storageBucket:"gabinete-rodrigo-v2.firebasestorage.app",messagingSenderId:"1080931013553",appId:"1:1080931013553:web:a358578d7e323e5a16a390"};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
-
-const $=s=>document.querySelector(s);
-const pad=n=>String(n).padStart(2,'0');
-const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
-const DOW=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
-const MONF=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-
+firebase.initializeApp(firebaseConfig);const auth=firebase.auth();const db=firebase.firestore();
+const $=e=>document.querySelector(e);const DOW=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];const MONF=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 let isSignup=false,userId,gabData={};
-
-function fmtLong(iso){const[y,m,d]=iso.split('-').map(Number);return `${DOW[new Date(y,m-1,d).getDay()]}, ${d} de ${MONF[m-1]}`;}
-function fmtHora(h){return h.slice(0,5);}
-
-function toast(msg){const w=$('#toastWrap');const t=document.createElement('div');t.className='toast';
-  t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>${msg}`;
-  w.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300);},2400);}
-
-function showAuth(show=true){$('#authScreen').classList.toggle('hidden',!show);$('#appContainer').classList.toggle('hidden',show);}
-
-function showError(msg){const err=$('#authError');err.textContent=msg;err.style.display='block';setTimeout(()=>err.style.display='none',4000);}
-
-function handleAuthSubmit(e){
-  e.preventDefault();const email=$('#authEmail').value;const pwd=$('#authPassword').value;
-  if(!email||!pwd){showError('Preencha email e senha');return;}
-  const authBtn=$('#authBtn');authBtn.disabled=true;authBtn.innerHTML='Processando...';
-  const fn=isSignup?auth.createUserWithEmailAndPassword:auth.signInWithEmailAndPassword;
-  fn.call(auth,email,pwd).then(r=>{
-    if(isSignup){db.collection('gabinetes').doc(r.user.uid).set({email,createdAt:firebase.firestore.FieldValue.serverTimestamp(),compromissos:[],demandas:[],contatos:[],equipe:[],metas:[],templates:[]});}
-    showAuth(false);
-  }).catch(e=>{showError(e.message);authBtn.disabled=false;authBtn.innerHTML=isSignup?'Criar conta':'Entrar';});
-}
-
-$('#authToggle').onclick=()=>{
-  isSignup=!isSignup;$('#authTitle').textContent=isSignup?'Criar conta':'Entrar';
-  $('#authSubtitle').textContent=isSignup?'Novo acesso ao Gabinete Digital':'Gabinete Digital — Gestão de mandato';
-  $('#authBtn').textContent=isSignup?'Criar conta':'Entrar';$('#authToggle').textContent=isSignup?'Voltar para login':'Criar nova conta';
-  $('#authError').style.display='none';
-};
-
-function handleLogout(){auth.signOut().then(()=>showAuth(true));}
-$('#logoutBtn').onclick=handleLogout;
-
-function closeModal(id){$(`.${id}`).classList.remove('show');$(`.#${id}`).classList.remove('show');document.getElementById(id).classList.remove('show');}
-function openModal(id){document.getElementById(id).classList.add('show');}
-
-function saveAgenda(e){
-  e.preventDefault();
-  const item={id:Date.now(),titulo:$('#agendaTitle').value,data:$('#agendaData').value,hora:$('#agendaHora').value,local:$('#agendaLocal').value,status:$('#agendaStatus').value};
-  if(!gabData.compromissos)gabData.compromissos=[];
-  gabData.compromissos.push(item);
-  db.collection('gabinetes').doc(userId).update({compromissos:gabData.compromissos});
-  e.target.reset();closeModal('modalAgenda');renderAgenda();renderDashboard();toast('Compromisso adicionado');}
-
-function saveDemanda(e){
-  e.preventDefault();
-  const item={id:Date.now(),titulo:$('#demandaTitle').value,solicitante:$('#demandaSolicitante').value,bairro:$('#demandaBairro').value,prioridade:$('#demandaPrioridade').value,status:$('#demandaStatus').value};
-  if(!gabData.demandas)gabData.demandas=[];
-  gabData.demandas.push(item);
-  db.collection('gabinetes').doc(userId).update({demandas:gabData.demandas});
-  e.target.reset();closeModal('modalDemanda');renderDemandas();renderDashboard();toast('Demanda adicionada');}
-
-function saveContato(e){
-  e.preventDefault();
-  const item={id:Date.now(),nome:$('#contatoNome').value,cargo:$('#contatoCargo').value,tel:$('#contatoTel').value,bairro:$('#contatoBairro').value,aniversario:$('#contatoAniversario').value||null};
-  if(!gabData.contatos)gabData.contatos=[];
-  gabData.contatos.push(item);
-  db.collection('gabinetes').doc(userId).update({contatos:gabData.contatos});
-  e.target.reset();closeModal('modalContato');renderContatos();toast('Contato adicionado');}
-
-function saveEquipe(e){
-  e.preventDefault();
-  const item={id:Date.now(),nome:$('#equipNome').value,funcao:$('#equipFuncao').value,tel:$('#equipTel').value};
-  if(!gabData.equipe)gabData.equipe=[];
-  gabData.equipe.push(item);
-  db.collection('gabinetes').doc(userId).update({equipe:gabData.equipe});
-  e.target.reset();closeModal('modalEquipe');renderEquipe();toast('Membro adicionado');}
-
-function saveMeta(e){
-  e.preventDefault();
-  const item={id:Date.now(),desc:$('#metaDesc').value,progress:parseInt($('#metaProgress').value),responsavel:$('#metaResponsavel').value};
-  if(!gabData.metas)gabData.metas=[];
-  gabData.metas.push(item);
-  db.collection('gabinetes').doc(userId).update({metas:gabData.metas});
-  e.target.reset();closeModal('modalMeta');renderMetas();toast('Meta adicionada');}
-
-function saveTemplate(e){
-  e.preventDefault();
-  const item={id:Date.now(),nome:$('#templateNome').value,msg:$('#templateMsg').value};
-  if(!gabData.templates)gabData.templates=[];
-  gabData.templates.push(item);
-  db.collection('gabinetes').doc(userId).update({templates:gabData.templates});
-  e.target.reset();closeModal('modalTemplate');renderTemplates();toast('Template salvo');}
-
-function deleteItem(col,id){
-  gabData[col]=gabData[col].filter(i=>i.id!==id);
-  db.collection('gabinetes').doc(userId).update({[col]:gabData[col]});
-  switch(col){case 'compromissos':renderAgenda();renderDashboard();break;case 'demandas':renderDemandas();renderDashboard();break;case 'contatos':renderContatos();break;case 'equipe':renderEquipe();break;case 'metas':renderMetas();break;case 'templates':renderTemplates();break;}
-  toast('Removido com sucesso');}
-
-function renderDashboard(){
-  const t=todayISO();
-  const hoje=(gabData.compromissos||[]).filter(c=>c.data===t);
-  const urg=(gabData.demandas||[]).filter(d=>d.status!=='resolvida'&&(d.prioridade==='urgente'||d.prioridade==='alta'));
-  const pend=(gabData.demandas||[]).filter(d=>d.status!=='resolvida').length;
-  const aniv=(gabData.contatos||[]).filter(c=>{if(!c.aniversario)return false;const[y,m,d]=c.aniversario.split('-');return m===pad(new Date().getMonth()+1)&&d===pad(new Date().getDate());});
-
-  $('#statRow').innerHTML=[
-    {i:'i-gold',n:hoje.length,l:'Compromissos hoje',ic:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'},
-    {i:'i-red',n:urg.length,l:'Demandas urgentes',ic:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><path d="M12 9v4M12 17h.01"/>'},
-    {i:'i-blue',n:pend,l:'Demandas abertas',ic:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'},
-    {i:'i-green',n:(gabData.contatos||[]).length,l:'Contatos',ic:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
-  ].map(s=>`<div class="stat"><div class="ico ${s.i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg></div><div class="num">${s.n}</div><div class="lbl">${s.l}</div></div>`).join('');
-
-  $('#agendaTimeline').innerHTML=hoje.length?`<div class="timeline">${hoje.sort((a,b)=>a.hora.localeCompare(b.hora)).map(c=>`<div class="event"><div class="event-time">${fmtHora(c.hora)}</div><div class="event-title">${c.titulo}</div><div class="event-desc">${c.local||c.bairro||''}</div></div>`).join('')}</div>`:emptyState('Dia livre — nenhum compromisso');
-
-  $('#urgentList').innerHTML=urg.length?urg.slice(0,3).map(d=>`<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:12px"><strong>${d.titulo}</strong><br><span style="color:var(--muted)">${d.solicitante} · ${d.bairro}</span><br><span class="chip c-${d.prioridade}" style="margin-top:6px">${d.prioridade}</span></div>`).join(''):emptyState('Nenhuma demanda urgente');
-}
-
-function renderAgenda(){
-  const arr=(gabData.compromissos||[]).sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  $('#agendaList').innerHTML=arr.length?arr.map(c=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center"><div><strong>${c.titulo}</strong><br><span style="font-size:12px;color:var(--muted)">${fmtLong(c.data)} às ${fmtHora(c.hora)}</span><br><span style="font-size:12px;color:var(--muted)">📍 ${c.local||c.bairro}</span></div><button class="ico-btn" data-del-agenda="${c.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button></div>`).join(''):emptyState('Nenhum compromisso agendado');
-  document.querySelectorAll('[data-del-agenda]').forEach(b=>b.onclick=()=>deleteItem('compromissos',parseInt(b.dataset.delAgenda)));
-}
-
-function renderDemandas(){
-  const nova=(gabData.demandas||[]).filter(d=>d.status==='nova');
-  const and=(gabData.demandas||[]).filter(d=>d.status==='andamento');
-  const res=(gabData.demandas||[]).filter(d=>d.status==='resolvida');
-  
-  $('#demandaPipeline').innerHTML=`
-    <div class="pipeline-col">
-      <h3>🆕 Nova</h3>
-      ${nova.map(d=>`<div class="card"><div class="card-title">${d.titulo}</div><div class="card-info">${d.solicitante} · ${d.bairro}</div><div class="card-acts"><span class="chip c-${d.prioridade}" style="font-size:10px">${d.prioridade}</span><button class="ico-btn" data-del-demand="${d.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('')}
-    </div>
-    <div class="pipeline-col">
-      <h3>⚙️ Andamento</h3>
-      ${and.map(d=>`<div class="card"><div class="card-title">${d.titulo}</div><div class="card-info">${d.solicitante} · ${d.bairro}</div><div class="card-acts"><span class="chip c-${d.prioridade}" style="font-size:10px">${d.prioridade}</span><button class="ico-btn" data-del-demand="${d.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('')}
-    </div>
-    <div class="pipeline-col">
-      <h3>✅ Resolvida</h3>
-      ${res.map(d=>`<div class="card"><div class="card-title">${d.titulo}</div><div class="card-info">${d.solicitante} · ${d.bairro}</div><div class="card-acts"><span class="chip c-${d.prioridade}" style="font-size:10px">${d.prioridade}</span><button class="ico-btn" data-del-demand="${d.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('')}
-    </div>
-  `;
-  document.querySelectorAll('[data-del-demand]').forEach(b=>b.onclick=()=>deleteItem('demandas',parseInt(b.dataset.delDemand)));
-}
-
-function renderContatos(){
-  const arr=(gabData.contatos||[]).sort((a,b)=>a.nome.localeCompare(b.nome));
-  $('#contatoList').innerHTML=arr.length?arr.map(c=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between"><div><strong>${c.nome}</strong><br><span style="font-size:12px;color:var(--muted)">${c.cargo||'—'} · ${c.bairro} · ${c.tel}</span></div><button class="ico-btn" data-del-contato="${c.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):emptyState('Nenhum contato cadastrado');
-  document.querySelectorAll('[data-del-contato]').forEach(b=>b.onclick=()=>deleteItem('contatos',parseInt(b.dataset.delContato)));
-}
-
-function renderEquipe(){
-  const arr=(gabData.equipe||[]);
-  $('#equipeList').innerHTML=arr.length?arr.map(e=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between"><div><strong>${e.nome}</strong><br><span style="font-size:12px;color:var(--muted)">${e.funcao} · ${e.tel}</span></div><button class="ico-btn" data-del-equipe="${e.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):emptyState('Nenhum membro da equipe');
-  document.querySelectorAll('[data-del-equipe]').forEach(b=>b.onclick=()=>deleteItem('equipe',parseInt(b.dataset.delEquipe)));
-}
-
-function renderMetas(){
-  const arr=(gabData.metas||[]);
-  $('#metaList').innerHTML=arr.length?arr.map(m=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong>${m.desc}</strong><button class="ico-btn" data-del-meta="${m.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div><div style="font-size:12px;color:var(--muted);margin-bottom:6px">${m.responsavel||'—'}</div><div style="width:100%;height:6px;background:var(--panel-3);border-radius:3px;overflow:hidden"><div style="width:${m.progress}%;height:100%;background:var(--gold);border-radius:3px"></div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">${m.progress}% concluído</div></div>`).join(''):emptyState('Nenhuma meta definida');
-  document.querySelectorAll('[data-del-meta]').forEach(b=>b.onclick=()=>deleteItem('metas',parseInt(b.dataset.delMeta)));
-}
-
-function renderTemplates(){
-  const arr=(gabData.templates||[]);
-  $('#templateList').innerHTML=arr.length?arr.map(t=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;margin-bottom:10px"><strong>${t.nome}</strong><div style="font-size:12px;color:var(--muted);margin:8px 0;white-space:pre-wrap">${t.msg}</div><button class="btn btn-ghost btn-sm" data-copy="${t.msg}">📋 Copiar</button> <button class="ico-btn" data-del-template="${t.id}" style="float:right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):emptyState('Nenhum template criado');
-  document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);toast('Copiado!')});
-  document.querySelectorAll('[data-del-template]').forEach(b=>b.onclick=()=>deleteItem('templates',parseInt(b.dataset.delTemplate)));
-}
-
-function emptyState(msg){return `<div class="empty" style="padding:60px 20px"><b style="color:var(--txt);font-family:var(--display)">${msg}</b></div>`;}
-
-function go(view){
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('show',v.id==='v-'+view));
-  const titles={dashboard:'Painel',agenda:'Agenda',demandas:'Demandas',contatos:'Contatos',equipe:'Equipe',metas:'Metas',whatsapp:'WhatsApp',relatorios:'Relatórios'};
-  $('#pageTitle').textContent=titles[view];
-  switch(view){case 'dashboard':renderDashboard();break;case 'agenda':renderAgenda();break;case 'demandas':renderDemandas();break;case 'contatos':renderContatos();break;case 'equipe':renderEquipe();break;case 'metas':renderMetas();break;case 'whatsapp':renderTemplates();break;case 'relatorios':renderRelatorios();break;}
-}
-
-document.querySelectorAll('.nav-btn').forEach(btn=>btn.onclick=()=>go(btn.dataset.nav));
-
-$('#btnAddAgenda').onclick=()=>openModal('modalAgenda');
-$('#btnAddDemanda').onclick=()=>openModal('modalDemanda');
-$('#btnAddContato').onclick=()=>openModal('modalContato');
-$('#btnAddEquipe').onclick=()=>openModal('modalEquipe');
-$('#btnAddMeta').onclick=()=>openModal('modalMeta');
-$('#btnAddTemplate').onclick=()=>openModal('modalTemplate');
-
-function renderRelatorios(){
-  const svg=$('#chartBairro');
-  const bairros=['Centro','Cohatrac','Cohama','Anil','Turu','Cidade Operária'];
-  const dados=bairros.map(b=>{const cnt=(gabData.demandas||[]).filter(d=>d.bairro===b).length;return{b,cnt};});
-  const max=Math.max(...dados.map(d=>d.cnt),1);
-  const barW=60;let x=60;
-  svg.innerHTML=`<g>${dados.map((d,i)=>{const h=(d.cnt/max)*200;const y=220-h;return`<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="#E6B04A" rx="4"/><text x="${x+barW/2}" y="245" text-anchor="middle" font-size="12" fill="#EAF0FA" font-family="'Sora',sans-serif" font-weight="600">${d.b}</text><text x="${x+barW/2}" y="${y-8}" text-anchor="middle" font-size="13" fill="#E6B04A" font-family="'Sora',sans-serif" font-weight="700">${d.cnt}</text>`;}x+=barW+16;return '';}).join('')}</g>`;
-}
-
-async function loadUserData(){
-  try{const snap=await db.collection('gabinetes').doc(userId).get();
-    gabData=snap.data()||{compromissos:[],demandas:[],contatos:[],equipe:[],metas:[],templates:[]};
-    if(!snap.exists){await db.collection('gabinetes').doc(userId).set(gabData);}
-    go('dashboard');
-  }catch(e){console.error(e);toast('Erro ao carregar dados');}}
-
-auth.onAuthStateChanged(user=>{
-  if(user){userId=user.uid;showAuth(false);loadUserData();toast('Bem-vindo ao Gabinete Digital!');}
-  else{showAuth(true);}
-});
-
-const d=new Date();$('#topDate').textContent=`${DOW[d.getDay()]}, ${d.getDate()} de ${MONF[d.getMonth()]} de ${d.getFullYear()}`;
+function fmtLong(e){const[a,t,o]=e.split('-').map(Number);return DOW[new Date(a,t-1,o).getDay()]+', '+o+' de '+MONF[t-1]}
+function fmtHora(e){return e.slice(0,5)}
+function toast(e){const a=$('#toastWrap'),t=document.createElement('div');t.className='toast',t.textContent=e,a.appendChild(t),setTimeout(()=>{t.style.opacity='0',setTimeout(()=>t.remove(),300)},2400)}
+function showAuth(e=!0){$('#authScreen').classList.toggle('hidden',!e),$('#appContainer').classList.toggle('hidden',e)}
+function showError(e){const a=$('#authError');a.textContent=e,a.style.display='block',setTimeout(()=>a.style.display='none',4e3)}
+function handleAuthSubmit(e){e.preventDefault();const a=$('#authEmail').value,t=$('#authPassword').value;if(!a||!t)return void showError('Preencha email e senha');const o=$('#authBtn');o.disabled=!0,o.textContent='Processando...';const r=isSignup?auth.createUserWithEmailAndPassword:auth.signInWithEmailAndPassword;r.call(auth,a,t).then(e=>{isSignup&&db.collection('gabinetes').doc(e.user.uid).set({email:a,createdAt:new Date(),compromissos:[],demandas:[],contatos:[],equipe:[],metas:[],templates:[]}),showAuth(!1)}).catch(e=>{showError(e.message),o.disabled=!1,o.textContent=isSignup?'Criar conta':'Entrar'})}
+$('#authToggle').onclick=()=>{isSignup=!isSignup,$('#authTitle').textContent=isSignup?'Criar conta':'Entrar',$('#authSubtitle').textContent=isSignup?'Novo acesso ao Gabinete Digital':'Gabinete Digital — Gestão de mandato',$('#authBtn').textContent=isSignup?'Criar conta':'Entrar',$('#authToggle').textContent=isSignup?'Voltar para login':'Criar nova conta',$('#authError').style.display='none'}
+$('#logoutBtn').onclick=()=>auth.signOut().then(()=>showAuth(!0));
+function closeModal(e){document.getElementById(e).classList.remove('show')}
+function openModal(e){document.getElementById(e).classList.add('show')}
+function saveAgenda(e){e.preventDefault();const a={id:Date.now(),titulo:$('#agendaTitle').value,data:$('#agendaData').value,hora:$('#agendaHora').value,local:$('#agendaLocal').value,status:$('#agendaStatus').value};gabData.compromissos||(gabData.compromissos=[]),gabData.compromissos.push(a),db.collection('gabinetes').doc(userId).update({compromissos:gabData.compromissos}),e.target.reset(),closeModal('modalAgenda'),renderAgenda(),renderDashboard(),toast('Compromisso adicionado')}
+function saveDemanda(e){e.preventDefault();const a={id:Date.now(),titulo:$('#demandaTitle').value,solicitante:$('#demandaSolicitante').value,bairro:$('#demandaBairro').value,prioridade:$('#demandaPrioridade').value,status:$('#demandaStatus').value};gabData.demandas||(gabData.demandas=[]),gabData.demandas.push(a),db.collection('gabinetes').doc(userId).update({demandas:gabData.demandas}),e.target.reset(),closeModal('modalDemanda'),renderDemandas(),renderDashboard(),toast('Demanda adicionada')}
+function saveContato(e){e.preventDefault();const a={id:Date.now(),nome:$('#contatoNome').value,cargo:$('#contatoCargo').value,tel:$('#contatoTel').value,bairro:$('#contatoBairro').value,aniversario:$('#contatoAniversario').value||null};gabData.contatos||(gabData.contatos=[]),gabData.contatos.push(a),db.collection('gabinetes').doc(userId).update({contatos:gabData.contatos}),e.target.reset(),closeModal('modalContato'),renderContatos(),toast('Contato adicionado')}
+function saveEquipe(e){e.preventDefault();const a={id:Date.now(),nome:$('#equipNome').value,funcao:$('#equipFuncao').value,tel:$('#equipTel').value};gabData.equipe||(gabData.equipe=[]),gabData.equipe.push(a),db.collection('gabinetes').doc(userId).update({equipe:gabData.equipe}),e.target.reset(),closeModal('modalEquipe'),renderEquipe(),toast('Membro adicionado')}
+function saveMeta(e){e.preventDefault();const a={id:Date.now(),desc:$('#metaDesc').value,progress:parseInt($('#metaProgress').value),responsavel:$('#metaResponsavel').value};gabData.metas||(gabData.metas=[]),gabData.metas.push(a),db.collection('gabinetes').doc(userId).update({metas:gabData.metas}),e.target.reset(),closeModal('modalMeta'),renderMetas(),toast('Meta adicionada')}
+function saveTemplate(e){e.preventDefault();const a={id:Date.now(),nome:$('#templateNome').value,msg:$('#templateMsg').value};gabData.templates||(gabData.templates=[]),gabData.templates.push(a),db.collection('gabinetes').doc(userId).update({templates:gabData.templates}),e.target.reset(),closeModal('modalTemplate'),renderTemplates(),toast('Template salvo')}
+function delItem(e,a){gabData[e]=gabData[e].filter(t=>t.id!==a),db.collection('gabinetes').doc(userId).update({[e]:gabData[e]}),'compromissos'===e?(renderAgenda(),renderDashboard()):'demandas'===e?(renderDemandas(),renderDashboard()):'contatos'===e?renderContatos():'equipe'===e?renderEquipe():'metas'===e?renderMetas():'templates'===e&&renderTemplates(),toast('Removido')}
+function renderDashboard(){const e=new Date().toISOString().split('T')[0],a=(gabData.compromissos||[]).filter(a=>a.data===e),t=(gabData.demandas||[]).filter(e=>'resolvida'!==e.status&&('urgente'===e.prioridade||'alta'===e.prioridade)),o=(gabData.demandas||[]).filter(e=>'resolvida'!==e.status).length;$('#statRow').innerHTML=[{i:'i-gold',n:a.length,l:'Compromissos hoje'},{i:'i-red',n:t.length,l:'Demandas urgentes'},{i:'i-blue',n:o,l:'Demandas abertas'},{i:'i-green',n:(gabData.contatos||[]).length,l:'Contatos'}].map(e=>`<div class="stat"><div class="ico ${e.i}"></div><div class="num">${e.n}</div><div class="lbl">${e.l}</div></div>`).join(''),$('#agendaTimeline').innerHTML=a.length?`<div class="timeline">${a.sort((e,a)=>e.hora.localeCompare(a.hora)).map(e=>`<div class="event"><div class="event-time">${fmtHora(e.hora)}</div><div class="event-title">${e.titulo}</div><div class="event-desc">${e.local||e.bairro||''}</div></div>`).join('')}</div>`:'<div class="empty">Dia livre</div>',$('#urgentList').innerHTML=t.length?t.slice(0,3).map(e=>`<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:12px"><strong>${e.titulo}</strong><br><span style="color:var(--muted)">${e.solicitante} · ${e.bairro}</span><br><span class="chip c-${e.prioridade}" style="margin-top:6px">${e.prioridade}</span></div>`).join(''):'<div class="empty">Nenhuma demanda urgente</div>'}
+function renderAgenda(){const e=(gabData.compromissos||[]).sort((e,a)=>(e.data+e.hora).localeCompare(a.data+a.hora));$('#agendaList').innerHTML=e.length?e.map(e=>`<div class="row"><div><strong>${e.titulo}</strong><br><span class="row-sub">${fmtLong(e.data)} às ${fmtHora(e.hora)}</span></div><button class="ico-btn" onclick="delItem('compromissos',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):'<div class="empty">Nenhum compromisso</div>'}
+function renderDemandas(){const e=(gabData.demandas||[]).filter(e=>'nova'===e.status),a=(gabData.demandas||[]).filter(e=>'andamento'===e.status),t=(gabData.demandas||[]).filter(e=>'resolvida'===e.status);$('#demandaPipeline').innerHTML=`<div class="pipeline-col"><h3>🆕 Nova</h3>${e.map(e=>`<div class="card"><div class="card-title">${e.titulo}</div><div class="card-info">${e.solicitante} · ${e.bairro}</div><div><span class="chip c-${e.prioridade}">${e.prioridade}</span><button class="ico-btn" onclick="delItem('demandas',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('')}</div><div class="pipeline-col"><h3>⚙️ Andamento</h3>${a.map(e=>`<div class="card"><div class="card-title">${e.titulo}</div><div class="card-info">${e.solicitante} · ${e.bairro}</div><div><span class="chip c-${e.prioridade}">${e.prioridade}</span><button class="ico-btn" onclick="delItem('demandas',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('')}</div><div class="pipeline-col"><h3>✅ Resolvida</h3>${t.map(e=>`<div class="card"><div class="card-title">${e.titulo}</div><div class="card-info">${e.solicitante} · ${e.bairro}</div><div><span class="chip c-${e.prioridade}">${e.prioridade}</span><button class="ico-btn" onclick="delItem('demandas',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></div>`).join('')}</div>`}
+function renderContatos(){const e=(gabData.contatos||[]).sort((e,a)=>e.nome.localeCompare(a.nome));$('#contatoList').innerHTML=e.length?e.map(e=>`<div class="row"><div><strong>${e.nome}</strong><br><span class="row-sub">${e.cargo||'—'} · ${e.bairro} · ${e.tel}</span></div><button class="ico-btn" onclick="delItem('contatos',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):'<div class="empty">Nenhum contato</div>'}
+function renderEquipe(){const e=(gabData.equipe||[]);$('#equipeList').innerHTML=e.length?e.map(e=>`<div class="row"><div><strong>${e.nome}</strong><br><span class="row-sub">${e.funcao} · ${e.tel}</span></div><button class="ico-btn" onclick="delItem('equipe',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):'<div class="empty">Nenhum membro</div>'}
+function renderMetas(){const e=(gabData.metas||[]);$('#metaList').innerHTML=e.length?e.map(e=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong>${e.desc}</strong><button class="ico-btn" onclick="delItem('metas',${e.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div><div style="font-size:12px;color:var(--muted);margin-bottom:6px">${e.responsavel||'—'}</div><div style="width:100%;height:6px;background:var(--panel-3);border-radius:3px;overflow:hidden"><div style="width:${e.progress}%;height:100%;background:var(--gold)"></div></div><div style="font-size:11px;color:var(--muted);margin-top:6px">${e.progress}%</div></div>`).join(''):'<div class="empty">Nenhuma meta</div>'}
+function renderTemplates(){const e=(gabData.templates||[]);$('#templateList').innerHTML=e.length?e.map(e=>`<div style="padding:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px"><strong>${e.nome}</strong><div style="font-size:12px;color:var(--muted);margin:8px 0;white-space:pre-wrap">${e.msg}</div><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${e.msg.replace(/'/g,"\\'")}');toast('Copiado')">📋 Copiar</button> <button class="ico-btn" onclick="delItem('templates',${e.id})" style="float:right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div>`).join(''):'<div class="empty">Nenhum template</div>'}
+function renderRelatorios(){const e=['Centro','Cohatrac','Cohama','Anil','Turu','Cidade Operária'],a=e.map(e=>{const a=(gabData.demandas||[]).filter(a=>a.bairro===e).length;return{b:e,cnt:a}});let t=60;$('#chartBairro').innerHTML=`<g>${a.map(e=>{const o=Math.max(...a.map(e=>e.cnt),1),r=e.cnt/o*200,d=220-r;return t+=16,`<rect x="${t}" y="${d}" width="60" height="${r}" fill="#E6B04A" rx="4"/><text x="${t+30}" y="245" text-anchor="middle" font-size="12" fill="#EAF0FA">${e.b}</text><text x="${t+30}" y="${d-8}" text-anchor="middle" font-size="13" fill="#E6B04A" font-weight="700">${e.cnt}</text>`}).join('')}</g>`}
+function go(e){document.querySelectorAll('.nav-btn').forEach(a=>a.classList.toggle('active',a.dataset.nav===e)),document.querySelectorAll('.view').forEach(a=>a.classList.toggle('show',a.id==='v-'+e));const a={dashboard:'Painel',agenda:'Agenda',demandas:'Demandas',contatos:'Contatos',equipe:'Equipe',metas:'Metas',whatsapp:'WhatsApp',relatorios:'Relatórios'};$('#pageTitle').textContent=a[e],'dashboard'===e?renderDashboard():'agenda'===e?renderAgenda():'demandas'===e?renderDemandas():'contatos'===e?renderContatos():'equipe'===e?renderEquipe():'metas'===e?renderMetas():'whatsapp'===e?renderTemplates():'relatorios'===e&&renderRelatorios()}
+document.querySelectorAll('.nav-btn').forEach(e=>e.onclick=()=>go(e.dataset.nav)),$('#btnAddAgenda').onclick=()=>openModal('modalAgenda'),$('#btnAddDemanda').onclick=()=>openModal('modalDemanda'),$('#btnAddContato').onclick=()=>openModal('modalContato'),$('#btnAddEquipe').onclick=()=>openModal('modalEquipe'),$('#btnAddMeta').onclick=()=>openModal('modalMeta'),$('#btnAddTemplate').onclick=()=>openModal('modalTemplate');async function loadUserData(){try{const e=await db.collection('gabinetes').doc(userId).get();gabData=e.data()||{compromissos:[],demandas:[],contatos:[],equipe:[],metas:[],templates:[]},e.exists||await db.collection('gabinetes').doc(userId).set(gabData),go('dashboard')}catch(e){console.error(e),toast('Erro ao carregar')}}
+auth.onAuthStateChanged(e=>{if(e)userId=e.uid,showAuth(!1),loadUserData(),toast('Bem-vindo!');else showAuth(!0)});const e=new Date();$('#topDate').textContent=`${DOW[e.getDay()]}, ${e.getDate()} de ${MONF[e.getMonth()]}`;
 </script>
 </body>
 </html>
